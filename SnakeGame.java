@@ -8,6 +8,7 @@
  * 		-instance variable for speed
  * 		-changed token to circle/rounded rectangle
  * 		-created clearer snake segments using rectangle outline
+ * 		-running scoreboard in window
  * 
  * To add:
  * 		-limited apple time
@@ -21,7 +22,6 @@
  * 			-adjust speed, number of apples, number of walls
  * 		-levels
  * 			-prompt to progress after set number of points
- * 		-running scoreboard at top of window
  */
 package snake;
 
@@ -68,10 +68,13 @@ public class SnakeGame extends Applet implements Runnable, KeyListener{
 	
 	
 	public void init() {
+		//set window area 
 		this.resize(windowX,windowY);
+		//when game is in play gameOver and paused are false
 		gameOver = false;
 		paused = false;
-		img = createImage(windowX, windowY);
+		//set viewable area
+		img = createImage(windowX,windowY);
 		gfx = img.getGraphics();
 		this.addKeyListener(this);
 		
@@ -85,6 +88,9 @@ public class SnakeGame extends Applet implements Runnable, KeyListener{
 	public void paint(Graphics g) {
 		gfx.setColor(Color.black);
 		gfx.fillRect(0, 0, windowX, windowY);
+		gfx.setColor(Color.white);
+		gfx.drawLine(0, windowY-50, windowX, windowY-50);
+		gfx.drawString("Score: " + token.getScore(), windowX/2-50, windowY-20);
 		
 		if (!gameOver && !paused) {
 			snake.draw(gfx);
@@ -136,7 +142,6 @@ public class SnakeGame extends Applet implements Runnable, KeyListener{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
 		}
 	}
 	
@@ -145,7 +150,7 @@ public class SnakeGame extends Applet implements Runnable, KeyListener{
 		if(snake.getHeadX() < 0 || snake.getHeadX() > windowX-segmentSize) {
 			gameOver = true;
 		}
-		if(snake.getHeadY() < 0 || snake.getHeadY() > windowY-segmentSize) {
+		if(snake.getHeadY() < 0 || snake.getHeadY() > windowY-segmentSize-50) {
 			gameOver = true;
 		}
 		//if snake hits self

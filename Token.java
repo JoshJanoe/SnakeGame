@@ -2,6 +2,7 @@ package snake;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.util.Timer;
 
 /**
  * 
@@ -19,18 +20,21 @@ public class Token {
 	private int x;
 	private int y; 
 	private int score;
+	private int tokenSize;
 	
 	private Snake snake;
+	private Thread thread;
 	
-	private int tokenSize;
 	
 	/**
 	 * 
 	 */
 	public Token(Snake s) {
 		//Math.random() creates random number from 0 to 1
-		x = (int)(Math.random() * SnakeGame.windowX-SnakeGame.segmentSize+1);
-		y = (int)(Math.random() * SnakeGame.windowY-SnakeGame.segmentSize+1);
+		//SnakeGame.windowX = 400, SnakeGame.segmentSize = 6,
+		// x = 393; y = 343
+		x = (int)(Math.random() * SnakeGame.windowX-SnakeGame.segmentSize-1);
+		y = (int)(Math.random() * SnakeGame.windowY-SnakeGame.segmentSize-1-50);
 		
 		snake = s;		
 		tokenSize = SnakeGame.segmentSize+SnakeGame.segmentSize/2;
@@ -38,8 +42,9 @@ public class Token {
 	
 	public void changePosition() {
 		//Math.random() creates random number from 0 to 1
-		x = (int)(Math.random() * SnakeGame.windowX-SnakeGame.segmentSize+1);
-		y = (int)(Math.random() * SnakeGame.windowY-SnakeGame.segmentSize+1);
+		
+		x = (int)(Math.random() * SnakeGame.windowX-SnakeGame.segmentSize-1);
+		y = (int)(Math.random() * SnakeGame.windowY-SnakeGame.segmentSize-1-50);
 	}
 
 	public int getScore() {
@@ -68,5 +73,5 @@ public class Token {
 		}
 		return false;
 	}
-
+	
 }

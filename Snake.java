@@ -28,7 +28,7 @@ public class Snake {
 	boolean isMoving;
 	boolean elongate;
 	
-	final int snakeStartSize = 10;
+	final int snakeStartSize = 5;
 	final int startX = 150;
 	final int startY = 150;
 	
