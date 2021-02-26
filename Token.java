@@ -34,7 +34,7 @@ public class Token {
 		//SnakeGame.windowX = 400, SnakeGame.segmentSize = 6,
 		// x = 393; y = 343
 		x = (int)(Math.random() * SnakeGame.windowX-SnakeGame.segmentSize-1);
-		y = (int)(Math.random() * SnakeGame.windowY-SnakeGame.segmentSize-1-50);
+		y = (int)(Math.random() * (SnakeGame.windowY-50)-SnakeGame.segmentSize-1);
 		
 		snake = s;		
 		tokenSize = SnakeGame.segmentSize+SnakeGame.segmentSize/2;
@@ -44,7 +44,7 @@ public class Token {
 		//Math.random() creates random number from 0 to 1
 		
 		x = (int)(Math.random() * SnakeGame.windowX-SnakeGame.segmentSize-1);
-		y = (int)(Math.random() * SnakeGame.windowY-SnakeGame.segmentSize-1-50);
+		y = (int)(Math.random() * (SnakeGame.windowY-50)-SnakeGame.segmentSize-1);
 	}
 
 	public int getScore() {

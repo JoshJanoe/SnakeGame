@@ -86,22 +86,27 @@ public class SnakeGame extends Applet implements Runnable, KeyListener{
 	}
 	
 	public void paint(Graphics g) {
+		//draw app area
 		gfx.setColor(Color.black);
 		gfx.fillRect(0, 0, windowX, windowY);
+		//create section for scroeboard
 		gfx.setColor(Color.white);
 		gfx.drawLine(0, windowY-50, windowX, windowY-50);
 		gfx.drawString("Score: " + token.getScore(), windowX/2-50, windowY-20);
 		
+		//if not gameOver or paused continue playing
 		if (!gameOver && !paused) {
 			snake.draw(gfx);
 			token.draw(gfx);
 		}
+		//if paused hide game and halt movement
 		else if (paused) {
 			gfx.setColor(Color.RED);
 			gfx.drawString("PAUSE", windowX/2-50, windowY/2-50);
 			//lock snake head x and y while paused
 			snake.setIsMoving(false);			
 		}
+		//if gameOver end game and show final score
 		else {
 			gfx.setColor(Color.RED);
 			gfx.drawString("Game Over", windowX/2-50, windowY/2-50);
@@ -223,14 +228,7 @@ public class SnakeGame extends Applet implements Runnable, KeyListener{
 				paused = false;
 			}
 		}
-		
-		//if "enter" is pressed on keyboard while game over
-//		if (gameOver) {		
-//			if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-//					gameOver = false;
-//					SnakeGame();
-//			}
-//		}
+				
 	}
 
 	public void keyReleased(KeyEvent arg0) {
@@ -244,3 +242,4 @@ public class SnakeGame extends Applet implements Runnable, KeyListener{
 	}
 			
 }
+
