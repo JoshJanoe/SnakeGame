@@ -1,30 +1,22 @@
 /**
  * Added so far:
- * 		-changed some basic formatting
- * 		-adjusted variable names
- * 		-clarifying comments
- * 		-pause feature
- * 		-instance variables for screen size, snake segment size, token/apple size
- * 		-instance variable for speed
- * 		-changed token to circle/rounded rectangle
- * 		-created clearer snake segments using rectangle outline
- * 		-running scoreboard in window
- * 		-added secondary token
- * 		-new game/restart
+ * 		-title screen
  * 
  * To add:
  * 		-limited apple time
  * 		-multiple apples/tokens
  * 		-variable apple score/abilities based on color
- * 			-red = slower, green = faster, blue = double points, purple = triple points, etc..
+ * 			-yellow = slower/smaller, green = faster/bigger
+ * 			-blue = double points, purple = triple points, etc..
  * 		-border wall
  * 			-replace out of bounds game over with wrap around
+ * 			-create opening in outer border
+ * 			-add borders/obstacles inside play area
  * 		-difficulty
  * 			-adjust speed, number of apples, number of walls
  * 		-levels
  * 			-prompt to progress after set number of points
- * 		-highscore
- * 		-title screen
+ * 		-highscore 		
  * 		-options screen
  */
 package snake;
@@ -39,8 +31,8 @@ import java.awt.event.KeyListener;
 /**
  * 
  * @author Josh Janoe
- * @version 1
- * created February 24, 2021
+ * @version 2
+ * created February 26, 2021
  * 
  * Basic snake game created using online tutorial by Krohn - Education on YouTube
  * Tutorial can be found at https://www.youtube.com/watch?v=9eQJAWhRHQg&feature=emb_logo
@@ -57,6 +49,7 @@ public class SnakeGame extends Applet implements Runnable, KeyListener{
 	Token token2;
 	boolean gameOver;
 	boolean paused;
+	boolean titleScreen;
 	
 	static int windowX = 400;
 	static int windowY = 400;
@@ -78,6 +71,7 @@ public class SnakeGame extends Applet implements Runnable, KeyListener{
 		//when game is in play gameOver and paused are false
 		gameOver = false;
 		paused = false;
+		titleScreen = true;
 		//set viewable area
 		img = createImage(windowX,windowY);
 		gfx = img.getGraphics();
@@ -103,8 +97,12 @@ public class SnakeGame extends Applet implements Runnable, KeyListener{
 		gfx.drawString("Score: " + totalScore, windowX/2+50, windowY-20);
 		gfx.drawString("Pause: Spacebar", 50, windowY-20);
 		
+		//start by loading title screen
+		if (titleScreen) {
+			titleScreen();
+		}		
 		//if not gameOver or paused continue playing
-		if (!gameOver && !paused) {
+		if (!gameOver && !paused && !titleScreen) {
 			playScreen();
 		}
 		//if paused hide game and halt movement
@@ -112,7 +110,7 @@ public class SnakeGame extends Applet implements Runnable, KeyListener{
 			pauseScreen();			
 		}
 		//if gameOver end game and show final score
-		else {
+		else if (gameOver) {
 			gameOverScreen();
 		}		
 				
@@ -125,11 +123,18 @@ public class SnakeGame extends Applet implements Runnable, KeyListener{
 	 * breakdown of different game screens for simplicity
 	 * possible additions include optionsScreen() and titleScreen()
 	 */
+	private void titleScreen() {
+		gfx.setColor(Color.RED);
+		gfx.drawString("SNAKE", windowX/2-30, windowY/2-75);
+		gfx.drawString("by JKnow Media", windowX/2-55, windowY/2-50);
+		gfx.drawString("Press ENTER to begin", windowX/2-70, windowY/2);
+	}
+	
 	private void playScreen() {
 		snake.draw(gfx);
 		token.draw(gfx);
 		token2.draw(gfx);
-	}
+	}	
 	
 	private void pauseScreen() {
 		gfx.setColor(Color.RED);
@@ -263,11 +268,12 @@ public class SnakeGame extends Applet implements Runnable, KeyListener{
 			}
 		}
 		
-		if (gameOver) {
+		if (gameOver || titleScreen) {
 			if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 				token.resetScore();
 				token2.resetScore();
 				gameOver = false;
+				titleScreen = false;
 				snake = new Snake();
 				token = new Token(snake);
 				token2 = new Token(snake);
