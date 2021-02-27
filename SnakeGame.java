@@ -1,10 +1,12 @@
 /**
  * Added so far:
  * 		-title screen
+ * 		-made snake head slightly larger than body
+ * 		-multiple apples/tokens
+ * 		-added timer for tokens but only for after first collision
  * 
  * To add:
- * 		-limited apple time
- * 		-multiple apples/tokens
+ * 		-apple timer for first location
  * 		-variable apple score/abilities based on color
  * 			-yellow = slower/smaller, green = faster/bigger
  * 			-blue = double points, purple = triple points, etc..
@@ -27,6 +29,8 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 
@@ -45,8 +49,11 @@ public class SnakeGame extends Applet implements Runnable, KeyListener{
 	Image img;
 	Thread thread;
 	Snake snake;
-	Token token;
-	Token token2;
+	
+	List<Token> tokens;
+	static int numTokens;
+	static int totalScore;
+	
 	boolean gameOver;
 	boolean paused;
 	boolean titleScreen;
@@ -55,7 +62,6 @@ public class SnakeGame extends Applet implements Runnable, KeyListener{
 	static int windowY = 400;
 	static int segmentSize = 6;
 	static int speed = 40;	//increase for slower snake, decrease for faster
-	
 	
 	/**
 	 * 
@@ -72,14 +78,22 @@ public class SnakeGame extends Applet implements Runnable, KeyListener{
 		gameOver = false;
 		paused = false;
 		titleScreen = true;
+		
 		//set viewable area
 		img = createImage(windowX,windowY);
 		gfx = img.getGraphics();
 		this.addKeyListener(this);
 		
+		//create game objects
 		snake = new Snake();
-		token = new Token(snake);
-		token2 = new Token(snake);
+		numTokens = 5;
+		tokens = new ArrayList<Token>();		
+		for (int i=0; i<numTokens;i++) {
+			Token token = new Token(snake);
+			tokens.add(token);
+		}
+		
+		totalScore=0;
 		
 		thread = new Thread(this);
 		thread.start();
@@ -92,8 +106,7 @@ public class SnakeGame extends Applet implements Runnable, KeyListener{
 		//create section for scroeboard
 		gfx.setColor(Color.white);
 		gfx.drawLine(0, windowY-50, windowX, windowY-50);
-		//total and configure score
-		int totalScore = token.getScore()+token2.getScore();
+		//total and configure score		
 		gfx.drawString("Score: " + totalScore, windowX/2+50, windowY-20);
 		gfx.drawString("Pause: Spacebar", 50, windowY-20);
 		
@@ -116,7 +129,7 @@ public class SnakeGame extends Applet implements Runnable, KeyListener{
 				
 		g.drawImage(img,0,0,null);
 		
-		//add border
+		//TODO add border
 	}
 	
 	/**
@@ -132,8 +145,9 @@ public class SnakeGame extends Applet implements Runnable, KeyListener{
 	
 	private void playScreen() {
 		snake.draw(gfx);
-		token.draw(gfx);
-		token2.draw(gfx);
+		for (Token t : tokens) {
+			t.draw(gfx);
+		}
 	}	
 	
 	private void pauseScreen() {
@@ -143,9 +157,45 @@ public class SnakeGame extends Applet implements Runnable, KeyListener{
 		snake.setIsMoving(false);
 	}
 	
-	private void gameOverScreen() {
-		int totalScore = token.getScore()+token2.getScore();
+	private void optionScreen() {
+		gfx.setColor(Color.RED);
+		gfx.drawString("OPTIONS", windowX/2-30, windowY+50);
 		
+		//TODO make current option/section white
+		//and display confirmation message upon selection
+		String parameter = "";
+		int setting = 0;
+		
+		//adjust snake color; provide preset options to avoid edge cases
+		gfx.drawString("Snake Color", 50, 100);
+		//options listed
+		gfx.drawString("Green", 50, 120);
+		gfx.drawString("Blue", 100, 120);
+		gfx.drawString("Red", 150, 120);
+		gfx.drawString("White", 200, 120);
+		gfx.drawString("Yellow", 250, 120);
+		
+		//adjust snake Size; provide preset options to avoid edge cases
+		gfx.drawString("Snake Size", 50, 150);
+		//options listed
+		gfx.drawString("Small", 50, 170);//segmentSize=4
+		gfx.drawString("Medium", 100, 170);//segmentSize=6
+		gfx.drawString("Large", 150, 170);//segmentSize=8
+		
+		//adjust snake speed; provide preset options to avoid edge cases
+		gfx.drawString("Snake Speed", 50, 200);
+		//options listed
+		gfx.drawString("Slow", 50, 220);//speed = 60
+		gfx.drawString("Medium", 100, 220);//speed = 40
+		gfx.drawString("Fast", 150, 220);//speed = 20
+	
+		gfx.drawString(parameter +" SET TO "+setting, windowX/2-50, windowY/2+50);
+		
+		gfx.drawString("Press ENTER to return to the title screen", windowX/2-50, windowY/2+100);
+		
+	}
+	
+	private void gameOverScreen() {
 		gfx.setColor(Color.RED);
 		gfx.drawString("Game Over", windowX/2-50, windowY/2-50);
 		gfx.drawString("Score: " + totalScore, windowX/2-50, windowY/2);
@@ -173,8 +223,9 @@ public class SnakeGame extends Applet implements Runnable, KeyListener{
 				//check for game over
 				this.checkGameOver();
 				//check for token collision
-				token.snakeCollision();
-				token2.snakeCollision();
+				for (Token t : tokens) {
+					t.snakeCollision();
+				}
 			}
 						
 			this.repaint();
@@ -202,6 +253,12 @@ public class SnakeGame extends Applet implements Runnable, KeyListener{
 		}
 		// TODO add scenario for if snake hits wall
 				
+	}
+	
+	//adds points whenever token collision is detected
+	//called in Token class
+	public static void addPoints() {
+		totalScore += 100;
 	}
 
 	public void keyPressed(KeyEvent e) {
@@ -270,13 +327,14 @@ public class SnakeGame extends Applet implements Runnable, KeyListener{
 		
 		if (gameOver || titleScreen) {
 			if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-				token.resetScore();
-				token2.resetScore();
 				gameOver = false;
 				titleScreen = false;
 				snake = new Snake();
-				token = new Token(snake);
-				token2 = new Token(snake);
+				tokens = new ArrayList<Token>();		
+				for (int i=0; i<numTokens;i++) {
+					tokens.add(new Token(snake));
+				}
+				totalScore = 0;
 			}			
 		}
 				

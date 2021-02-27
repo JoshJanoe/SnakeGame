@@ -2,7 +2,6 @@ package snake;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.util.Timer;
 
 /**
  * 
@@ -19,10 +18,12 @@ public class Token {
 	private int y; 
 	private int score;
 	private int tokenSize;
+	private int seconds = 10;
 	
 	private Snake snake;
 	private Thread thread;
 	
+	private TokenTimer timer;	
 	
 	/**
 	 * 
@@ -30,18 +31,21 @@ public class Token {
 	public Token(Snake s) {
 		//Math.random() creates random number from 0 to 1
 		//SnakeGame.windowX = 400, SnakeGame.segmentSize = 6,
-		// x = 393; y = 343
 		x = (int)(Math.random() * SnakeGame.windowX-SnakeGame.segmentSize-tokenSize)+tokenSize;
 		y = (int)(Math.random() * (SnakeGame.windowY-50)-SnakeGame.segmentSize-tokenSize)+tokenSize;
 		
 		snake = s;		
 		tokenSize = SnakeGame.segmentSize+SnakeGame.segmentSize/2;
+		
+		//timer = new TokenTimer(seconds,this);
 	}
 	
 	public void changePosition() {
-		//Math.random() creates random number from 0 to 1
+		//Math.random() creates random number from 0 to 1		
 		x = (int)(Math.random() * SnakeGame.windowX-SnakeGame.segmentSize-tokenSize)+tokenSize;
 		y = (int)(Math.random() * (SnakeGame.windowY-50)-SnakeGame.segmentSize-tokenSize)+tokenSize;
+		
+		timer = new TokenTimer(seconds,this);
 	}
 
 	public int getScore() {
@@ -62,16 +66,11 @@ public class Token {
 		if (snakeX >= x-1 && snakeX <= (x + (tokenSize + 1))) {
 			if (snakeY >= y-1 && snakeY <= (y + (tokenSize + 1))) {
 				changePosition();
-				score += 100;
+				SnakeGame.addPoints();
 				snake.grow();
-				return true;
 			}
 		}
 		return false;
-	}
-	
-	public void resetScore() {
-		score = 0;
 	}
 	
 }

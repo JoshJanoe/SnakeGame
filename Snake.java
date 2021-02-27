@@ -23,12 +23,14 @@ public class Snake {
 	boolean isMoving;
 	boolean elongate;
 	
-	final int snakeStartSize = 3;
 	final int startX;
 	final int startY;
 	
-	final int segmentSize = 6;
+	final int snakeStartSize = 3;
+	int segmentSize;
 	int snakeSize;
+	
+	Color snakeColor;
 	
 	/**
 	 * 
@@ -43,6 +45,8 @@ public class Snake {
 		startX = SnakeGame.windowX/2;
 		startY = SnakeGame.windowY/2;
 		snakeSize = snakeStartSize;
+		segmentSize = 6;
+		snakeColor = snakeColor.green;
 		
 		snakePoints.add(new Point(startX,startY));
 		for (int i = 1; i < snakeStartSize;i++) {
@@ -65,18 +69,20 @@ public class Snake {
 	
 	public void draw(Graphics g) {				
 		//set main color of snake
-		g.setColor(Color.green);
+		g.setColor(snakeColor);
+		Point head = snakePoints.get(0);
 		//draw rectangle for each snake segment
 		for(Point p : snakePoints) {
 			g.fillRect(p.getX(), p.getY(), segmentSize, segmentSize);
 		}
-		
+		g.fillRect(head.getX()-1, head.getY()-1, segmentSize+2, segmentSize+2);
 		//set color of snake segment outline
 		g.setColor(Color.white);
 		//draw rectangle for each snake segment outline
 		for(Point p : snakePoints) {
 			g.drawRect(p.getX(), p.getY(), segmentSize, segmentSize);
 		}
+		g.drawRect(head.getX()-1, head.getY()-1, segmentSize+2, segmentSize+2);
 	}
 	
 	//moves snake by redrawing 
@@ -117,8 +123,17 @@ public class Snake {
 		return segmentSize;
 	}
 	
+	public void setSegmentSize(int size) {
+		segmentSize = size;
+	}
+	
 	public void setElongate(boolean b) {
 		elongate = b;
+	}
+	
+	//c must be in the form color.somecolor
+	public void setSnakeColor(Color c) {
+		snakeColor = c;
 	}
 	
 	/**
