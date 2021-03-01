@@ -1,7 +1,7 @@
 package snake;
 
-import java.awt.Color;
 import java.awt.Graphics;
+import java.util.Random;
 
 /**
  * 
@@ -12,65 +12,74 @@ import java.awt.Graphics;
  * Token/apple object for use in SnakeGame
  *
  */
-public class Token {
+public abstract class Token {
 
-	private int x;
-	private int y; 
-	private int score;
-	private int tokenSize;
-	private int seconds = 10;
+	protected int x;
+	protected int y; 
+	protected int score;
+	protected int seconds = 10;
 	
-	private Snake snake;
-	private Thread thread;
+	protected Snake snake;
+	protected Thread thread;
 	
-	private TokenTimer timer;	
-	
+	private long startTime;
+	private long elapsedTime;
+	Random myRandom = new Random();
+		
 	/**
 	 * 
 	 */
 	public Token(Snake s) {
 		//Math.random() creates random number from 0 to 1
 		//SnakeGame.windowX = 400, SnakeGame.segmentSize = 6,
-		x = (int)(Math.random() * SnakeGame.windowX-SnakeGame.segmentSize-tokenSize)+tokenSize;
-		y = (int)(Math.random() * (SnakeGame.windowY-50)-SnakeGame.segmentSize-tokenSize)+tokenSize;
+		x = (int)(Math.random() * settings.windowX-settings.segmentSize-settings.tokenSize)+settings.tokenSize;
+		y = (int)(Math.random() * (settings.windowY-50)-settings.segmentSize-settings.tokenSize)+settings.tokenSize;
 		
-		snake = s;		
-		tokenSize = SnakeGame.segmentSize+SnakeGame.segmentSize/2;
-		
-		//timer = new TokenTimer(seconds,this);
+		snake = s;	
+		startTime = System.nanoTime();
 	}
 	
-	public void changePosition() {
-		//Math.random() creates random number from 0 to 1		
-		x = (int)(Math.random() * SnakeGame.windowX-SnakeGame.segmentSize-tokenSize)+tokenSize;
-		y = (int)(Math.random() * (SnakeGame.windowY-50)-SnakeGame.segmentSize-tokenSize)+tokenSize;
-		
-		timer = new TokenTimer(seconds,this);
-	}
-
-	public int getScore() {
-		return score;
+	public boolean timedMove() {
+		long currTime = System.nanoTime();
+		elapsedTime = (currTime - startTime)/1000000000;
+		if (elapsedTime == 10) {
+			tokenAcquired();
+			return true;
+		}
+		return false;
 	}
 	
-	
-	public void draw(Graphics g) {
-		g.setColor(Color.red);
-		g.fillRoundRect(x,y,tokenSize,tokenSize,tokenSize,tokenSize);
+	public String getElapsedTime() {
+		return String.valueOf(elapsedTime);
 	}
+	
+	public void draw(Graphics g) {}
 	
 	public boolean snakeCollision() {
 		//get location of center of snake head
-		int snakeX = snake.getHeadX()+snake.getSegmentSize()/2;
-		int snakeY = snake.getHeadY()+snake.getSegmentSize()/2;
+		int snakeX = snake.getHeadX()+settings.segmentSize/2;
+		int snakeY = snake.getHeadY()+settings.segmentSize/2;
 		
-		if (snakeX >= x-1 && snakeX <= (x + (tokenSize + 1))) {
-			if (snakeY >= y-1 && snakeY <= (y + (tokenSize + 1))) {
-				changePosition();
-				SnakeGame.addPoints();
-				snake.grow();
+		if (snakeX >= x-1 && snakeX <= (x + (settings.tokenSize + 1))) {
+			if (snakeY >= y-1 && snakeY <= (y + (settings.tokenSize + 1))) {	
+				tokenAcquired();
+				return true;
 			}
 		}
 		return false;
+	}
+	
+	public void tokenAcquired() {}
+	
+	private Token getTokenType(int num) {
+		if (num<=60) return new redAppleToken(snake);
+		if (num>60 && num <= 85) return new greenAppleToken(snake);
+		if (num>85 && num <=89) return new yellowAppleToken(snake);
+		if (num>89 && num <=91.5) return new growToken(snake);
+		if (num>91.5 && num <=94) return new shrinkToken(snake);
+		if (num>94 && num <=96.5) return new speedToken(snake);
+		if (num>96.5 && num <=99) return new slowToken(snake);
+		return new redAppleToken(snake);
 	}
 	
 }

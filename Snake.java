@@ -27,10 +27,9 @@ public class Snake {
 	final int startY;
 	
 	final int snakeStartSize = 3;
-	int segmentSize;
 	int snakeSize;
 	
-	Color snakeColor;
+	
 	
 	/**
 	 * 
@@ -42,15 +41,13 @@ public class Snake {
 		isMoving = false;
 		elongate = false;
 		
-		startX = SnakeGame.windowX/2;
-		startY = SnakeGame.windowY/2;
+		startX = settings.windowX/2;
+		startY = settings.windowY/2;
 		snakeSize = snakeStartSize;
-		segmentSize = 6;
-		snakeColor = snakeColor.green;
 		
 		snakePoints.add(new Point(startX,startY));
 		for (int i = 1; i < snakeStartSize;i++) {
-			snakePoints.add(new Point(startX - i*segmentSize, startY));
+			snakePoints.add(new Point(startX - i*settings.segmentSize, startY));
 		}
 	}
 
@@ -69,20 +66,20 @@ public class Snake {
 	
 	public void draw(Graphics g) {				
 		//set main color of snake
-		g.setColor(snakeColor);
+		g.setColor(settings.color);
 		Point head = snakePoints.get(0);
 		//draw rectangle for each snake segment
 		for(Point p : snakePoints) {
-			g.fillRect(p.getX(), p.getY(), segmentSize, segmentSize);
+			g.fillRect(p.getX(), p.getY(), settings.segmentSize, settings.segmentSize);
 		}
-		g.fillRect(head.getX()-1, head.getY()-1, segmentSize+2, segmentSize+2);
+		g.fillRect(head.getX()-1, head.getY()-1, settings.segmentSize+2, settings.segmentSize+2);
 		//set color of snake segment outline
 		g.setColor(Color.white);
 		//draw rectangle for each snake segment outline
 		for(Point p : snakePoints) {
-			g.drawRect(p.getX(), p.getY(), segmentSize, segmentSize);
+			g.drawRect(p.getX(), p.getY(), settings.segmentSize, settings.segmentSize);
 		}
-		g.drawRect(head.getX()-1, head.getY()-1, segmentSize+2, segmentSize+2);
+		g.drawRect(head.getX()-1, head.getY()-1, settings.segmentSize+2, settings.segmentSize+2);
 	}
 	
 	//moves snake by redrawing 
@@ -92,7 +89,7 @@ public class Snake {
 			Point start = snakePoints.get(0);
 			Point last = snakePoints.get(snakePoints.size()-1);
 			//set new location
-			Point newStart = new Point(start.getX() + xDir*segmentSize, start.getY()+yDir*segmentSize);
+			Point newStart = new Point(start.getX() + xDir*settings.segmentSize, start.getY()+yDir*settings.segmentSize);
 			//each point becomes the point that previously preceded it
 			for (int i=snakePoints.size()-1; i >=1; i--) {
 				snakePoints.set(i, snakePoints.get(i-1));
@@ -117,24 +114,7 @@ public class Snake {
 	
 	public void setIsMoving(boolean b) {
 		isMoving = b;
-	}
-	
-	public int getSegmentSize() {
-		return segmentSize;
-	}
-	
-	public void setSegmentSize(int size) {
-		segmentSize = size;
-	}
-	
-	public void setElongate(boolean b) {
-		elongate = b;
-	}
-	
-	//c must be in the form color.somecolor
-	public void setSnakeColor(Color c) {
-		snakeColor = c;
-	}
+	}	
 	
 	/**
 	 * Basic X and Y getters and setters
