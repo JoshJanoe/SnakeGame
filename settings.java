@@ -1,15 +1,7 @@
 package snake;
 
 import java.awt.Color;
-import java.util.HashMap;
-
-/**
- * Added so far:
- * 		-title screen
- * 		-made snake head slightly larger than body
- * 		-multiple apples/tokens
- * 		-added timer for tokens but only for after first collision
-
+import java.awt.Font;
 
 /**
  * 
@@ -23,122 +15,45 @@ import java.util.HashMap;
  */
 public class settings {
 
-	protected static int numTokens = 10;
-	protected static int totalScore = 0;
-	protected static int segmentSize = 6;
-	protected static int speed = 40;	//increase for slower snake, decrease for faster	
-	protected static int windowX = 400;
-	protected static int windowY = 400;
-	protected static int timeout = 10;
-	protected static int tokenSize = 8;
-	protected static Color color = Color.green;
+	protected static int numTokens = 15;//10;	//number of tokens on screen at any given time
+	protected static int totalScore = 0;	//current game score
+	protected static int segmentSize = 8;//6;	//size of the snake's body
+	protected static int speed = 30;//40;		//increase for slower snake, decrease for faster	
+	protected static int windowX = 600;//400;		//window width
+	protected static int windowY = 600;//400;		//widnow height
+	protected static int timeout = 10;		//number of second before a token automatically disappears and relocates
+	protected static int tokenSize = 10;//8		//height and width of tokens
+	protected static Color snakeColor = Color.green;		//snake color
 	
+	protected static boolean darkMode = true;
+	protected static Color baseColor = Color.black;		//color of background
+	protected static Color accentColor = Color.white;		//color of lines and accents
+	protected static Color textColor = Color.red; 		//color of text
+	
+	protected static boolean wrapMode = false;
+	
+	static Font titleFont = new Font("Courier", 1, 40);
+	static Font regFont = new Font("Courier", 1, 18);
+	
+	//unused constructor
 	public settings() {
 				
 	}
 	
-//	public static void addPoints(int points) {
-//		totalScore += points;
-//	}
-
-//	/**
-//	 * @return the numTokens
-//	 */
-//	public static int getNumTokens() {
-//		return numTokens;
-//	}
-//
-//	/**
-//	 * @param numTokens the numTokens to set
-//	 */
-//	public static void setNumTokens(int num) {
-//		numTokens = num;
-//	}
-//
-//	/**
-//	 * @return the totalScore
-//	 */
-//	public static int getTotalScore() {
-//		return totalScore;
-//	}
-//
-//	/**
-//	 * @param totalScore the totalScore to set
-//	 */
-//	public static void setTotalScore(int score) {
-//		totalScore = score;
-//	}
-//
-//	/**
-//	 * @return the segmentSize
-//	 */
-//	public static int getSegmentSize() {
-//		return segmentSize;
-//	}
-//
-//	/**
-//	 * @param segmentSize the segmentSize to set
-//	 */
-//	public static void setSegmentSize(int size) {
-//		segmentSize = size;
-//	}
-//
-//	/**
-//	 * @return the speed
-//	 */
-//	public static int getSpeed() {
-//		return speed;
-//	}
-//
-//	/**
-//	 * @param speed the speed to set
-//	 */
-//	public static void setSpeed(int s) {
-//		speed = s;
-//	}
-//
-//	/**
-//	 * @return the windowX
-//	 */
-//	public static int getWindowX() {
-//		return windowX;
-//	}
-//
-//	/**
-//	 * @param windowX the windowX to set
-//	 */
-//	public static void setWindowX(int X) {
-//		windowX = X;
-//	}
-//
-//	/**
-//	 * @return the windowY
-//	 */
-//	public static int getWindowY() {
-//		return windowY;
-//	}
-//
-//	/**
-//	 * @param windowY the windowY to set
-//	 */
-//	public static void setWindowY(int Y) {
-//		windowY = Y;
-//	}
-//
-//	/**
-//	 * @return the color
-//	 */
-//	public static Color getColor() {
-//		return color;
-//	}
-//
-//	/**
-//	 * @param color the color to set
-//	 */
-//	public static void setColor(Color c) {
-//		color = c;
-//	}
-//	
-//	
+	public static void darkMode(boolean b) {
+		darkMode = b;
+		if (!darkMode) {
+			baseColor = Color.white;
+			accentColor = Color.black;
+			textColor = Color.blue;
+			darkMode = false;
+		}
+		if (darkMode) {
+			baseColor = Color.black;
+			accentColor = Color.white;
+			textColor = Color.red;
+			darkMode = true;
+		}
+	}
 	
 }

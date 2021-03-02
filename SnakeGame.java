@@ -6,9 +6,12 @@
  * 		-added timer for tokens but only for after first collision
  * 		-apple timer for first location
  * 		-variable apple score/abilities based on color
- * 			-yellow = slower/smaller, green = faster/bigger
- * 			-blue = double points, purple = triple points, etc..
+ * 			-cyan = slower/smaller, faster/bigger
+ * 			-green = x2.5 points, yellow = x5 points, etc..
  * 		-add settings class to store game settings/options variables
+ * 		-added option/variable for allowing screen wrap when out of bounds
+ * 		-create fading effect before tokens disappear
+ * 		-randomized token active time
  * 
  * To add:
  * 		-border wall
@@ -19,13 +22,16 @@
  * 			-adjust speed, number of apples, number of walls
  * 		-levels
  * 			-prompt to progress after set number of points
- * 		-highscore 		
+ * 		-high score 		
  * 		-options screen
+ * 		-use Damped Sine Function and opacity for fade()
  */
 package snake;
 
 import java.applet.Applet;
 import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.KeyEvent;
@@ -33,6 +39,7 @@ import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
 
 /**
  * 
@@ -47,19 +54,31 @@ import java.util.Random;
  */
 public class SnakeGame extends Applet implements Runnable, KeyListener{
 
-	Graphics gfx;
-	Image img;
-	Thread thread;
+	static Graphics gfx;
+	static Image img;
+	static Thread thread;
 	static Snake snake;	
 	static List<Token> tokens;
-	boolean gameOver, paused, titleScreen;	
-	static Random myRandom = new Random();	
+	static boolean gameOver, paused, titleScreen;	
+	static Random myRandom = new Random();
+	static Font heading, regular;
+	
+	Long startTime;
+	Long currTime;
+	
+	//static Barrier barrier = new Barrier();
+	static List<Barrier> barriers;
 	
 	public SnakeGame() {
 		// TODO Auto-generated constructor stub
+		barriers = new ArrayList<Barrier>();
 	}
 	
-	
+	/**
+	 * Initialize game, create window, 
+	 * set variables to default values
+	 * and create necessary game objects
+	 */
 	public void init() {
 		//set window area 
 		this.resize(settings.windowX,settings.windowY);
@@ -79,6 +98,11 @@ public class SnakeGame extends Applet implements Runnable, KeyListener{
 		
 		thread = new Thread(this);
 		thread.start();
+		
+		barrierMap1();
+		startTime = System.nanoTime();
+		settings.darkMode(true);
+		
 	}
 	
 	/**
@@ -91,36 +115,72 @@ public class SnakeGame extends Applet implements Runnable, KeyListener{
 	 * @return list of random tokens
 	 */
 	public ArrayList<Token> getTokens() {
+		//create empty array of tokens to late return
 		ArrayList<Token> tokenList = new ArrayList<Token>();
+		//create numTokens number of tokens using loop
 		for (int i = 0; i < settings.numTokens; i++) {
+			//create random number for token type generation
 			int rng = myRandom.nextInt(100);
+			//create new token
 			Token currToken = getTokenType(rng);
+			//add token to array
 			tokenList.add(currToken);
 		}
+		//return list of random tokens
 		return tokenList;
 	}
 	
+	/**
+	 * Use preset values to generate tokens based on random input number
+	 * 
+	 * @param num is a random number used to select a token based on preset parameters
+	 * @return a new token object
+	 */
 	private static Token getTokenType(int num) {
-		if (num<=60) return new redAppleToken(snake);
-		if (num>60 && num <= 85) return new greenAppleToken(snake);
-		if (num>85 && num <=89) return new yellowAppleToken(snake);
-		if (num>89 && num <=91.5) return new growToken(snake);
-		if (num>91.5 && num <=94) return new shrinkToken(snake);
-		if (num>94 && num <=96.5) return new speedToken(snake);
-		if (num>96.5 && num <=99) return new slowToken(snake);
-		return new redAppleToken(snake);
+		//if num is 0-59 create red apple, 60% chance
+		if (num<=59) return new redAppleToken(snake, gfx);
+		//if num is 60-84 create red apple, 25% chance
+		if (num>59 && num <= 84) return new greenAppleToken(snake, gfx);
+		//if num is 85-89 create red apple, 5% chance
+		if (num>84 && num <=89) return new yellowAppleToken(snake, gfx);
+		//if num is 89-91.5 create red apple, 2.5% chance
+		if (num>89 && num <=91.5) return new growToken(snake, gfx);
+		//if num is 91.5-94 create red apple, 2.5% chance
+		if (num>91.5 && num <=94) return new shrinkToken(snake, gfx);
+		//if num is 94-96.5 create red apple, 2.5% chance
+		if (num>94 && num <=96.5) return new speedToken(snake, gfx);
+		//if num is 96.5-99 create red apple, 2.5% chance
+		if (num>96.5 && num <=99) return new slowToken(snake, gfx);
+		//if all else fails, place a standard red apple
+		return new redAppleToken(snake, gfx);
 	}
 	
+	/**
+	 * Draws appropriate graphics for given screen
+	 * based on game variable/booleans
+	 * 
+	 * Includes: Title Screen, Play Screen
+	 * 			Pause Screen, and Game Over Screen
+	 * 
+	 * TODO: add Options/Settings screen and HighScores Screen
+	 */
 	public void paint(Graphics g) {
+		//update time
+		Long timeNow = System.nanoTime();
+		currTime = (timeNow - startTime)/1000000000;
 		//draw app area
-		gfx.setColor(Color.black);
+		gfx.setColor(settings.baseColor);
 		gfx.fillRect(0, 0, settings.windowX, settings.windowY);
-		//create section for scroeboard
-		gfx.setColor(Color.white);
+		gfx.setColor(Color.gray);
+		gfx.drawRect(0, 0, settings.windowX-1, settings.windowY-1);
+		//create section for scoreboard
+		gfx.setColor(settings.accentColor);
 		gfx.drawLine(0, settings.windowY-50, settings.windowX, settings.windowY-50);
-		//total and configure score		
-		gfx.drawString("Score: " + settings.totalScore, settings.windowX/2+50, settings.windowY-20);
-		gfx.drawString("Pause: Spacebar", 50, settings.windowY-20);
+		//total and configure score
+		gfx.setColor(settings.textColor);
+		gfx.drawString("Score: " + settings.totalScore, settings.windowX-200, settings.windowY-20);
+		gfx.drawString("Pause: Spacebar", 20, settings.windowY-20);
+		//gfx.drawString("Timer:"+currTime, settings.windowX/2-20, settings.windowY-20);
 		
 		//start by loading title screen
 		if (titleScreen) {
@@ -128,6 +188,7 @@ public class SnakeGame extends Applet implements Runnable, KeyListener{
 		}		
 		//if not gameOver or paused continue playing
 		if (!gameOver && !paused && !titleScreen) {
+			currTime = 0L;
 			playScreen();
 		}
 		//if paused hide game and halt movement
@@ -148,30 +209,51 @@ public class SnakeGame extends Applet implements Runnable, KeyListener{
 	 * breakdown of different game screens for simplicity
 	 * possible additions include optionsScreen() and titleScreen()
 	 */
-	private void titleScreen() {
-		gfx.setColor(Color.RED);
-		gfx.drawString("SNAKE", settings.windowX/2-30, settings.windowY/2-75);
-		gfx.drawString("by JKnow Media", settings.windowX/2-55, settings.windowY/2-50);
-		gfx.drawString("Press ENTER to begin", settings.windowX/2-70, settings.windowY/2);
+	private void titleScreen() {		
+		gfx.setFont(settings.titleFont);
+		gfx.setColor(settings.textColor);		
+		gfx.drawString("SNAKE", settings.windowX/2-80, settings.windowY/2-75);		
+		gfx.setFont(settings.regFont);
+		gfx.drawString("by JKnow Media", settings.windowX/2-105, settings.windowY/2-50);
+		gfx.drawString("Press ENTER to begin", settings.windowX/2-120, settings.windowY/2);
 	}
 	
+	/**
+	 * Displays objects (snake and tokens) while the game is in play
+	 */
 	private void playScreen() {
 		snake.draw(gfx);
 		for (Token t : tokens) {
 			t.draw(gfx);
-			//gfx.drawString(t.getElapsedTime(), windowX/2, windowY/2);
+		}		
+		for (Barrier b : barriers) {
+			//b.draw(gfx);
 		}
 	}	
 	
+	/**
+	 * Displays a Pause screen that stops game play until resumed by player
+	 */
 	private void pauseScreen() {
-		gfx.setColor(Color.RED);
-		gfx.drawString("PAUSE", settings.windowX/2-50, settings.windowY/2-50);
+		gfx.setFont(settings.titleFont);
+		//set text color to red
+		gfx.setColor(settings.textColor);
+		//write "PAUSE" in center of screen
+		gfx.drawString("PAUSE", settings.windowX/2-75, settings.windowY/2-50);
+		gfx.setFont(settings.regFont);
 		//lock snake head x and y while paused
 		snake.setIsMoving(false);
 	}
 	
+	/**
+	 * Displays game settings/options screen
+	 * to allow user to modify certain settings for
+	 * more customizable experience
+	 * 
+	 * options include: snake color, starting snake speed, and snake size 
+	 */
 	private void optionScreen() {
-		gfx.setColor(Color.RED);
+		gfx.setColor(settings.textColor);
 		gfx.drawString("OPTIONS", settings.windowX/2-30, settings.windowY+50);
 		
 		//TODO make current option/section white
@@ -208,24 +290,43 @@ public class SnakeGame extends Applet implements Runnable, KeyListener{
 		
 	}
 	
+	/**
+	 * Displays game over screen
+	 * Also shows score and provides option to try again 
+	 */
 	private void gameOverScreen() {
-		gfx.setColor(Color.RED);
-		gfx.drawString("Game Over", settings.windowX/2-50, settings.windowY/2-50);
+		gfx.setFont(settings.titleFont);
+		//set text color to red
+		gfx.setColor(settings.textColor);
+		//write "Game Over" in center of screen
+		gfx.drawString("Game Over", settings.windowX/2-100, settings.windowY/2-50);
+		gfx.setFont(settings.regFont);
+		//display ending score under "Game Over"
 		gfx.drawString("Score: " + settings.totalScore, settings.windowX/2-50, settings.windowY/2);
-		gfx.drawString("Press ENTER to try again", settings.windowX/2-85, settings.windowY/2+50);
+		//display instruction to press enter to start new game
+		gfx.drawString("Press ENTER to try again", settings.windowX/2-135, settings.windowY/2+50);
 	}
 	
 	/**
-	 * basic game function and drawing
+	 * Refreshes graphics/drawings on screen
 	 */
 	public void update(Graphics g) {
 		paint(g);
 	}
 	
+	/**
+	 * Refreshes graphics/drawings on screen
+	 */
 	public void repaint(Graphics g) {
 		paint(g);
 	}
 	
+	/**
+	 * Core game function
+	 * Continuous loop moving snake object,
+	 * checking for game over scenarios,
+	 * and repainting screen
+	 */
 	public void run() {
 		//infinite loop
 		for(;;) {
@@ -240,6 +341,9 @@ public class SnakeGame extends Applet implements Runnable, KeyListener{
 					t.snakeCollision();
 					t.timedMove();
 				}
+				for (Barrier b : barriers) {
+					b.barrierCollision();
+				}
 			}
 						
 			this.repaint();
@@ -253,31 +357,101 @@ public class SnakeGame extends Applet implements Runnable, KeyListener{
 		}
 	}
 	
-	public void checkGameOver() {
-		//if snake goes out of bounds
+	/**
+	 * Checks to see if conditions have been met for game over
+	 * including snake collides with self, snake collides with wall
+	 * or snake goes out of bounds (if wrap not enabled)
+	 */
+	private void checkGameOver() {
+		//if snake goes out of bounds in X
 		if(snake.getHeadX() < 0 || snake.getHeadX() > settings.windowX-settings.segmentSize) {
-			gameOver = true;
+			//if wrapMode is inactive set gameOver to true
+			if(!settings.wrapMode)gameOver = true;
+			//if wrapMode is active wrap to other side
+			if(settings.wrapMode)mapWrap();
 		}
 		if(snake.getHeadY() < 0 || snake.getHeadY() > settings.windowY-settings.segmentSize-50) {
-			gameOver = true;
+			//gameOver = true;
+			if(settings.wrapMode)mapWrap();
+			if(!settings.wrapMode)gameOver = true;
 		}
 		//if snake hits self
 		if (snake.snakeCollision() && snake.snakeSize > snake.snakeStartSize) {
 			gameOver = true;
 		}
 		// TODO add scenario for if snake hits wall
-				
+		
+		boolean wallHit = false;
+		for (Barrier b : barriers) {
+			if (b.barrierCollision()) {
+				wallHit = true;
+			}
+		}
+		if (wallHit) {
+			gameOver = true;
+		}
+		
 	}
 	
-	public static void replaceToken(Token t) {
+	/**
+	 * Replaces an existing token with a new one
+	 * allowing for variable token types
+	 * 
+	 * @param t
+	 */
+	protected static void replaceToken(Token t) {
+		//generate random number between 0-99
 		int rng = myRandom.nextInt(100);
+		//generate token based on random number
 		Token currToken = getTokenType(rng);
+		//replace current token with new token
 		int currIndex = tokens.indexOf(t);
 		tokens.set(currIndex, currToken);
 	}
 	
 	/**
-	 * key events below
+	 * Allows out of bounds occurrences to send snake to opposite bound
+	 */
+	private static void mapWrap() {
+		//if snake goes out of bounds to the left, relocate to right
+		if(snake.getHeadX() < 0){
+			snake.setHeadX(settings.windowX-settings.segmentSize);
+		}
+		//if snake goes out of bounds to the right, relocate to left
+		if (snake.getHeadX() > settings.windowX-settings.segmentSize) {
+			snake.setHeadX(settings.segmentSize);
+		}
+		//if snake goes out of bounds at the top, relocate to bottom
+		if(snake.getHeadY() < 0) {
+			snake.setHeadY(settings.windowY-settings.segmentSize-50);
+		}
+		//if snake goes out of bounds at the bottom, relocate to top
+		if (snake.getHeadY() > settings.windowY-settings.segmentSize-50) {
+			snake.setHeadY(settings.segmentSize);
+		}
+	}
+	
+	/**
+	 * creates barriers object around perimeter of map/window
+	 */
+	protected static void barrierMap1() {
+		//create wall for each border side of map/window
+		Barrier leftWall = new Barrier(1,1,15,settings.windowY-2-50, snake);
+		Barrier rightWall = new Barrier(settings.windowX-16,1,15,settings.windowY-2-50, snake);
+		Barrier topWall = new Barrier(1,1,settings.windowX-2,15, snake);
+		Barrier bottomWall = new Barrier(1,settings.windowY-16-50,settings.windowX-2,15, snake);
+		//add each barrier/wall to barrier array "barriers"
+		SnakeGame.barriers.add(leftWall);
+		SnakeGame.barriers.add(rightWall);
+		SnakeGame.barriers.add(topWall);
+		SnakeGame.barriers.add(bottomWall);
+	}
+	
+	/**
+	 * When a given key is pressed a provided action is performed
+	 * 
+	 * Key events vary depending on screen/game/setting booleans
+	 * @param KeyEvent e is any key that is pressed on user keyboard during gameplay
 	 */
 	public void keyPressed(KeyEvent e) {
 		//remember 1 is down in Y and right in X

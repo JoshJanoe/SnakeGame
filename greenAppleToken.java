@@ -14,8 +14,8 @@ import java.awt.Graphics;
  */
 public class greenAppleToken extends Token {
 
-	public greenAppleToken(Snake s) {
-		super(s);
+	public greenAppleToken(Snake s, Graphics g) {
+		super(s,g);
 	}
 	
 	/**
@@ -28,6 +28,11 @@ public class greenAppleToken extends Token {
 	public void draw(Graphics g) {
 		g.setColor(Color.green);
 		g.fillRoundRect(x,y,settings.tokenSize,settings.tokenSize,settings.tokenSize,settings.tokenSize);
+		
+		g.setColor(settings.accentColor);
+		g.drawRoundRect(x,y,settings.tokenSize,settings.tokenSize,settings.tokenSize,settings.tokenSize);
+		
+		fade(Color.green);
 	}
 	
 	/**

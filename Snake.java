@@ -66,7 +66,7 @@ public class Snake {
 	
 	public void draw(Graphics g) {				
 		//set main color of snake
-		g.setColor(settings.color);
+		g.setColor(settings.snakeColor);
 		Point head = snakePoints.get(0);
 		//draw rectangle for each snake segment
 		for(Point p : snakePoints) {
@@ -74,7 +74,7 @@ public class Snake {
 		}
 		g.fillRect(head.getX()-1, head.getY()-1, settings.segmentSize+2, settings.segmentSize+2);
 		//set color of snake segment outline
-		g.setColor(Color.white);
+		g.setColor(settings.accentColor);
 		//draw rectangle for each snake segment outline
 		for(Point p : snakePoints) {
 			g.drawRect(p.getX(), p.getY(), settings.segmentSize, settings.segmentSize);
@@ -143,6 +143,14 @@ public class Snake {
 	//y position of head of snake
 	public int getHeadY() {
 		return snakePoints.get(0).getY();
+	}
+	
+	public void setHeadX(int x) {
+		snakePoints.set(0,snakePoints.get(0)).setX(x);
+	}
+	
+	public void setHeadY(int y) {
+		snakePoints.set(0,snakePoints.get(0)).setY(y);		
 	}
 	
 }

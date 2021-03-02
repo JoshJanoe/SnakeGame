@@ -14,8 +14,8 @@ import java.awt.Graphics;
  */
 public class speedToken extends Token {
 
-	public speedToken(Snake s) {
-		super(s);
+	public speedToken(Snake s, Graphics g) {
+		super(s,g);
 	}
 	
 	/**
@@ -26,9 +26,14 @@ public class speedToken extends Token {
 	 */
 	@Override
 	public void draw(Graphics g) {
-		g.setColor(Color.white);
+		g.setColor(Color.cyan);
 		g.fillRoundRect(x,y,settings.tokenSize,settings.tokenSize,settings.tokenSize,settings.tokenSize);
 		g.drawString(">>>", x, y+settings.tokenSize);
+	
+		g.setColor(settings.accentColor);
+		g.drawRoundRect(x,y,settings.tokenSize,settings.tokenSize,settings.tokenSize,settings.tokenSize);
+		
+		fade(Color.cyan);	
 	}
 	
 	/**
@@ -39,7 +44,7 @@ public class speedToken extends Token {
 	 */
 	@Override
 	public void tokenAcquired() {
-		if(settings.speed > 20) {
+		if(settings.speed > 10) {
 			settings.speed -= 5;
 		}				
 		SnakeGame.replaceToken(this);

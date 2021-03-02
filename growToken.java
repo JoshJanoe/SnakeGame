@@ -14,8 +14,8 @@ import java.awt.Graphics;
  */
 public class growToken extends Token {
 
-	public growToken(Snake s) {
-		super(s);
+	public growToken(Snake s, Graphics g) {
+		super(s,g);
 	}
 	
 	/**
@@ -26,9 +26,14 @@ public class growToken extends Token {
 	 */
 	@Override
 	public void draw(Graphics g) {
-		g.setColor(Color.white);
+		g.setColor(Color.cyan);
 		g.fillRoundRect(x,y,settings.tokenSize,settings.tokenSize,settings.tokenSize,settings.tokenSize);
 		g.drawString("+", x, y);
+		
+		g.setColor(settings.accentColor);
+		g.drawRoundRect(x,y,settings.tokenSize,settings.tokenSize,settings.tokenSize,settings.tokenSize);
+		
+		fade(Color.cyan);
 	}
 	
 	/**
@@ -39,8 +44,9 @@ public class growToken extends Token {
 	 */
 	@Override
 	public void tokenAcquired() {
-		if(settings.segmentSize<9) {
+		if(settings.segmentSize<15) {
 			settings.segmentSize += 2;
+			settings.speed += 5;
 		}	
 		SnakeGame.replaceToken(this);
 	}

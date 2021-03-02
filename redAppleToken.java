@@ -14,8 +14,8 @@ import java.awt.Graphics;
  */
 public class redAppleToken extends Token {
 
-	public redAppleToken(Snake s) {
-		super(s);
+	public redAppleToken(Snake s, Graphics g) {
+		super(s,g);
 	}
 	
 	/**
@@ -28,6 +28,11 @@ public class redAppleToken extends Token {
 	public void draw(Graphics g) {
 		g.setColor(Color.red);
 		g.fillRoundRect(x,y,settings.tokenSize,settings.tokenSize,settings.tokenSize,settings.tokenSize);
+		
+		g.setColor(settings.accentColor);
+		g.drawRoundRect(x,y,settings.tokenSize,settings.tokenSize,settings.tokenSize,settings.tokenSize);
+		
+		fade(Color.red);
 	}
 	
 	/**
