@@ -3,7 +3,8 @@
 @author Josh Janoe
 created February 24, 2021
  
-Basic snake game created using online tutorial by Krohn - Education on YouTube
+Version 0:
+Basic snake game created using online tutorial by Krohn - Education on YouTube.  
 Tutorial can be found at https://www.youtube.com/watch?v=9eQJAWhRHQg&feature=emb_logo
 Code for initial version can be found in Version0 folder, changes listed in most recent SnakeGame.java file
 
